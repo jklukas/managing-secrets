@@ -36,6 +36,7 @@ jobs:
     docker:
       - image: python:3.7
     steps:
+      - run: circleci step halt
       - early_return_for_forked_pull_requests
       - checkout
       - attach_workspace:
