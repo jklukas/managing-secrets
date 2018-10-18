@@ -1,11 +1,6 @@
 version: 2.1
 
 commands:
-  # CircleCI generally only triggers builds on commits to the main repository,
-  # so PRs coming from branches of the main repo simply reference builds for existing commits
-  # (CIRCLE_BRANCH=branchname and CIRCLE_PR_NUMBER is unset);
-  # The only time PRs will trigger a build is when the PR is referencing a fork
-  # (CIRCLE_BRANCH=pull/XXX and CIRCLE_PR_NUMBER=XXX).
   early_return_for_forked_pull_requests:
     description: >-
       If this build is from a fork, stop executing the current job and return success.
