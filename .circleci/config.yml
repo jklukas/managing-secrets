@@ -59,16 +59,16 @@ workflows:
           type: approval
           filters:
             branches:
-              only: /pull.*/
+              only: /pull/[0-9]+/
       - testhold:
           requires:
             - hold
           filters:
             branches:
-              only: /pull.*/
+              only: /pull/[0-9]+/
   build-for-branches:
     jobs:
       - test:
           filters:
             branches:
-              ignore: /pull.*/
+              ignore: /pull/[0-9]+/
