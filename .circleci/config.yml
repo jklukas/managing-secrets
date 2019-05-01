@@ -1,19 +1,5 @@
 version: 2.1
 
-commands:
-  early_return_for_forked_pull_requests:
-    description: >-
-      If this build is from a fork, stop executing the current job and return success.
-      This is useful to avoid steps that will fail due to missing credentials.
-    steps:
-      - run:
-          name: Early return if this build is from a forked PR
-          command: |
-            if [ -n "$CIRCLE_PR_NUMBER" ]; then
-              echo "Nothing to upload for forked PRs, so marking this step successful"
-              circleci step halt
-            fi
-
 jobs:
   test:
     docker:
@@ -21,36 +7,22 @@ jobs:
     steps:
       - checkout
       - run: mvn clean test
-  package:
+  test-with-data:
     docker:
       - image: circleci/openjdk:8-jdk
     steps:
-      - early_return_for_forked_pull_requests
       - checkout
-      - run: mvn clean package
-      - persist_to_workspace:
-          root: target
-          paths:
-            - managing-secrets-1.3.jar
-  deploy:
-    docker:
-      - image: python:3.7
-    steps:
-      - run: circleci step halt
-      - early_return_for_forked_pull_requests
-      - checkout
-      - attach_workspace:
-          at: target
-      - run: pip install awscli
-      - run: aws s3 cp target/managing-secrets-1.3.jar s3://mybucket/managing-secrets/$CIRCLE_BRANCH/managing-secrets-1.3.jar
+      - run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "No AWS_ACCESS_KEY_ID is set! Failing..."
+            exit 1;
+          else
+            echo "Credentials are available. Let's fetch the data!"
+          fi
 
 workflows:
   version: 2
   build:
     jobs:
       - test
-      - package
-      - deploy:
-          requires:
-            - test
-            - package
+      - test-with-data
